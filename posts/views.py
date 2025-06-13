@@ -1,8 +1,13 @@
 from django.shortcuts import render, HttpResponse
 import random
+from posts.models import Post
 
 def test_view(request):
     return HttpResponse(f'hello, this is a test view, {random.randint(1, 100)}')
 
-def html_view(request):
+def homepage_view(request):
     return render(request, 'base.html')
+
+def posts_list_view(request):
+    posts = Post.objects.all()
+    return render(request, "posts/posts_list.html", context={"posts": posts})
