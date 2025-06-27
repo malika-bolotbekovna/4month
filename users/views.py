@@ -1,7 +1,10 @@
 from django.shortcuts import render, HttpResponse, redirect
 from django.contrib.auth.models import User
+from users.models import Profile
 from users.forms import RegisterForm, LoginForm
 from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
+
 
 
 def register_view(request):
@@ -12,10 +15,12 @@ def register_view(request):
         form = RegisterForm(request.POST, request.FILES)
         if form.is_valid():
             form.cleaned_data.__delitem__("password_confirm")
+            avatar = form.cleaned_data.pop("avatar", None)
+            age = form.cleaned_data.pop("age", None)
             user = User.objects.create_user(**form.cleaned_data)
             if user:
+                Profile.objects.create(user=user, avatar=avatar,age=age)
                 return redirect("/")
-                return HttpResponse(f"User created, {user.id}")
             else:
                 return HttpResponse("User not created")
         else:
@@ -43,3 +48,13 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect("/")
+
+@login_required(login_url="login_view")
+def profile_view(request):
+    user = request.user
+    if user:
+        profile =Profile.objects.get(user=user)
+        user_posts = user.posts.all()
+        return render(request, "users/profile.html", context={"profile": profile, "posts": user_posts})
+    else:
+        return HttpResponse("User not found")

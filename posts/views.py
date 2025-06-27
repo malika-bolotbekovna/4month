@@ -1,9 +1,11 @@
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import redirect, render, HttpResponse
 import random
 from posts.models import Post
 from django.db.models import Q
-from posts.forms import PostForm2, SearchForm
+from posts.forms import PostForm2, SearchForm, PostUpdateForm
 from django.contrib.auth.decorators import login_required
+from django.views import View
+
 
 
 
@@ -18,6 +20,11 @@ end = page * limit
 
 def test_view(request):
     return HttpResponse(f'hello, this is a test view, {random.randint(1, 100)}')
+
+
+class TestView(View):
+    def get(self, request):
+        return HttpResponse(f'hello, this is a test view, {random.randint(1, 100)}')
 
 def homepage_view(request):
     if request.method == "GET":
@@ -91,3 +98,19 @@ def post_create_view(request):
         else:
             return render(request, "posts/post_create.html", context={"form": form})
     
+@login_required(login_url="login_view")
+def post_update_view(request, post_id):
+    post = Post.objects.filter(id=post_id, author=request.user).first()
+    if not post:
+        return HttpResponse("Post not found")
+    if request.method == "GET":
+        form = PostUpdateForm(instance=post)
+        return render(request, "posts/post_update.html", context={"form": form, "post": post})
+    
+    if request.method == "POST":
+        form = PostUpdateForm(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            form.save()
+            return redirect('profile_view')
+        else:
+            return render(request, "posts/post_update.html", context={"form": form, "post": post})

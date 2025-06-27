@@ -16,8 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from posts.views import test_view, homepage_view, posts_list_view ,post_detail_view, post_create_view
-from users.views import register_view, login_view, logout_view
+from posts.views import test_view, homepage_view, posts_list_view ,post_detail_view, post_create_view, post_update_view, TestView
+from users.views import register_view, login_view, logout_view, profile_view
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -25,15 +25,17 @@ users_urls = [
     path('register/', register_view, name='register_view'),
     path('login/', login_view, name='login_view'),
     path('logout/', logout_view, name='logout_view'),
+    path('profile/', profile_view, name='profile_view'),
 ]
 
 # старницы на сайте
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('test/', test_view, name='test_view'),
+    path('test/', TestView.as_view(), name='test_view'),
     path('', homepage_view, name='html_view'),
     path('posts/', posts_list_view, name='posts_list_view'),  
     path('post/<int:post_id>/', post_detail_view, name="post_detail_view"),
     path('posts/create/', post_create_view, name='post_create_view'),
+    path('posts/<int:post_id>/update/', post_update_view, name='post_update_view'),
 ]
 urlpatterns += users_urls + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,5 +1,6 @@
 # создает таблицы бд с помощью python-классов 
 from django.db import models
+from django.contrib.auth.models import User
 
 
 """CharField() - as VARCHAR()
@@ -81,10 +82,9 @@ class Post(models.Model):
     rate = models.CharField(default=0, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
-    category = models.ForeignKey(
-        Category, on_delete=models.CASCADE, null=True, blank=True
-    )
+    category = models.ForeignKey (Category, on_delete=models.CASCADE, null=True, blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name="posts")
 
     def __str__(self):
         return self.title
